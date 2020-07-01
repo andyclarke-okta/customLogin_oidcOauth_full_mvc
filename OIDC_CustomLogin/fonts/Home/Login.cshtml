@@ -1,0 +1,136 @@
+﻿@{
+    ViewBag.Title = "Login Page";
+}
+
+
+<div id="loginverification" class="infobox infobox-error infobox-compact icon-16 clear signin-feedback" style="display:none">
+    <span class="glyphicon glyphicon-exclamation-sign form-alert"></span>
+    <p id="errmessage"> </p>
+</div>
+@*<div style="display:inline; margin:10px; padding:10px;">
+    <span id="session"></span>
+    <span id="display_session_id"></span>
+</div>*@
+<br />
+<div id="signin-box" class="rounded-6 sign-in-content">
+    <p id="demo"></p>
+    <fieldset style="display:block;">
+        <legend id="signInLabel">OIDC Login methods with Custom Authorization Server</legend>
+        <form action="~/Home/Route" method="post" id="logincredentials" class="v-form"  autocomplete="off" style="border:none;">
+            @Html.ValidationSummary(true)
+            @Html.AntiForgeryToken()
+
+
+            <p>&nbsp</p>
+            <input id="location" name="location" type="hidden" value="none" placeholder="" />
+            <input id="relayState" name="relayState" type="hidden" value="@TempData["relayState"]" placeholder="" />
+            <div class="inline-label-wrap margin-btm-10">
+                <label id="usernameLabel" for="userName" class="first margin-0">Username</label>
+                <input name="userName" id="userName" type="text" value="@TempData["userName"]" onfocus="hidebanner(document.getElementById('loginverification'))" tabindex="1">
+            </div>
+            <br />
+
+            <div class="inline-label-wrap margin-btm-10">
+                <label id="passwordLabel" for="passWord" class="margin-0">Password</label>
+                <input name="passWord" id="passWord" type="password" autocomplete="off" value="" onfocus="hidebanner(document.getElementById('loginverification'))" tabindex="2">
+            </div>
+            <br />
+            <input value="Authn Sign In" name="authnlogin_but" type="submit" id="authnlogin_but" class="button allow-in-read-only allow-in-safe-mode" tabindex="4">
+            <label id="login" for="authnlogin_but">sign in redirect Only</label>
+            <input value="OIDC Sign In" name="oidclogin_but" type="submit" id="oidclogin_but" class="button allow-in-read-only allow-in-safe-mode" tabindex="4">
+            <label id="login" for="oidclogin_but">sign in redirect with OIDC</label>
+            <input value="Initiate Auth OIDC" name="oidc_but" type="submit" id="oidc_but" class="button allow-in-read-only allow-in-safe-mode"  tabindex="4">
+            <label id="oidc" for="oidc_but">Initiate OIDC Authorization Code workflow without Session Cookie</label>
+            <input value="Initiate Implicit OIDC" name="oidc_but" type="submit" id="oidc_but" class="button allow-in-read-only allow-in-safe-mode" tabindex="4">
+            <label id="oidc" for="oidc_but">Initiate OIDC Implicit workflow without Session Cookie</label>
+            <input value="Client Credential Flow" name="oidc_but" type="submit" id="oidc_but" class="button allow-in-read-only allow-in-safe-mode" tabindex="4">
+            <label id="oidc" for="oidc_but">Client Credential Flow</label>
+
+        </form>
+
+        @*<button id="sessionme_but" onclick="displaySessions()" class="button allow-in-read-only allow-in-safe-mode float-n"> Display Sessions</button>*@
+    </fieldset>
+
+
+</div> <!-- signin block-->
+
+
+<script>
+
+
+    (function () {
+        var url = window.location.href;
+        var arr = url.split("/");
+        var result = arr[0] + "//" + arr[2];
+        //document.getElementById("demo").innerHTML = result;
+        document.forms["logincredentials"]["location"].value = result;
+    })();
+</script>
+
+<script>
+
+
+    var myOktaOrg = "@TempData["oktaOrg"]";
+    //var myToken = "@TempData["token"]";
+    var mySessionId = "no session data";
+
+
+    function validateForm() {
+        var x = document.forms["logincredentials"]["userName"].value;
+        var y = document.forms["logincredentials"]["passWord"].value;
+        if (x == null || x == "" || y == null || y == "") {
+            document.getElementById("errmessage").innerHTML = "fields must be filled in";
+            showbanner(document.getElementById("loginverification"));
+            return false;
+        }
+    }
+
+    function showbanner(which) {
+        if (!document.getElementById)
+            return
+            which.style.display = "inherit"
+    }
+
+    function hidebanner(which) {
+        if (!document.getElementById)
+            return
+        which.style.display = "none"
+    }
+
+    function displaySessions() {
+        // Variables
+        baseUrl = myOktaOrg;
+
+        document.getElementById("session").innerHTML = "Current Sessions Id: ";
+
+
+        // Detect if user has session...
+        $.ajax({
+            url: baseUrl + '/api/v1/sessions/me',
+            type: 'GET',
+            xhrFields: { withCredentials: true },
+            accept: 'application/json'
+        })
+        .done(function (meData) {
+            console.log('me: ', meData);
+            console.log('session_id', meData.id);
+            document.getElementById("display_session_id").innerHTML = meData.id;
+           // document.getElementById("session_id").value = meData.id;
+           // mySessionId = meData.id;
+
+            console.log("Just Redirect Here:", nextURI);
+           // debugger;
+            // window.location = nextURI;
+
+        })
+        .fail(function (meData, textStatus, error) {
+            console.log('meData: ', meData);
+            console.log('meData.status: ', meData.status);
+            console.log('statusText: ', meData.statusText);
+            console.log('error: ', error);
+
+            document.getElementById("display_session_id").innerHTML = "No Session ID present";
+
+        });
+    }
+</script>

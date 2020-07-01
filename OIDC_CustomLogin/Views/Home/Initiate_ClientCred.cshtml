@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Login Page";
+}
+
+
+<div id="loginverification" class="infobox infobox-error infobox-compact icon-16 clear signin-feedback" style="display:none">
+    <span class="glyphicon glyphicon-exclamation-sign form-alert"></span>
+    <p id="errmessage"> </p>
+</div>
+<div style="display:inline; margin:10px; padding:10px;">
+    <span id="session"></span>
+    <span id="display_session_id"></span>
+</div>
+<br />
+<div id="signin-box" class="rounded-6 sign-in-content">
+    <p id="demo"></p>
+    <fieldset style="display:block;">
+        <legend id="signInLabel">Initiate Client Credential Workflow</legend>
+        <form action="~/Home/ClientCredRoute" method="post" id="logincredentials" class="v-form"  autocomplete="off" style="border:none;">
+            @Html.ValidationSummary(true)
+            @Html.AntiForgeryToken()
+
+            <p>&nbsp</p>
+            <input id="location" name="location" type="hidden" value="none" placeholder="" />
+            <input id="relayState" name="relayState" type="hidden" value="@TempData["relayState"]" placeholder="" />
+
+
+            <input value="Client Credential Flow" name="oidc_but" type="submit" id="oidc_but" class="button allow-in-read-only allow-in-safe-mode" tabindex="4">
+            <label id="oidc" for="oidc_but">Initiate OAUTH Client Credential workflow</label>
+
+        </form>
+
+
+    </fieldset>
+
+
+</div> <!-- signin block-->
+
+
+
+

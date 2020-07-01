@@ -1,0 +1,140 @@
+﻿
+
+@{
+    ViewBag.Title = "ClientCred";
+}
+
+
+<br />
+<br />
+<div style="display:inline; margin:10px; padding:10px;">
+    <span id="session"></span>
+    <span id="my_session_id"></span>
+</div>
+<br />
+<br />
+@*<div style="display:block; margin:10px; padding:10px;">*@
+<div id="signin-box" class="rounded-6 sign-in-content">
+
+    <h1>Client Credential Landing</h1>
+
+
+    <fieldset style="display:block;">
+        <form action="~/AltLanding/SendWebApi_wToken" method="post" id="sendWebApi" class="v-form" autocomplete="off" style="border:none;">
+            @*@Html.ValidationSummary(true)
+            @Html.AntiForgeryToken()*@
+            <input id="accessToken" name="accessToken" type="hidden" value="@TempData["accessToken"]" placeholder="" />
+            <input id="idToken" name="idToken" type="hidden" value="@TempData["idToken"]" placeholder="" />
+            <input id="refreshToken" name="refreshToken" type="hidden" value="@TempData["refreshToken"]" placeholder="" />
+            <input id="oktaId" name="oktaId" type="hidden" placeholder="" />
+            <input id="session_id" name="session_id" type="hidden" placeholder="" />
+            <br />
+            <input value="sendAccessToken" name="sendToken_but" type="submit" id="sendToken_but" class="button allow-in-read-only allow-in-safe-mode" tabindex="4">
+            <label id="sendToken" for="sendToken_but">Send Request to Web Api w Access Token</label>
+
+        </form>
+
+    </fieldset>
+
+</div>
+
+<div>
+    <button id="sessionme_but" onclick="displaySessions()" class="button allow-in-read-only allow-in-safe-mode float-n"> Display Sessions</button>
+    <label id="sessionme" for="sessionme_but">Display Session Cookie from client-side</label>
+    <br />
+    <br />
+    <button id="logout_but" onclick="logoutSessions()" class="button allow-in-read-only allow-in-safe-mode float-n"> Logout User</button>
+    <label id="logout" for="logout_but">Logout User from client-side</label>
+</div>
+
+
+
+
+
+
+<script>
+    //debugger;
+var myOktaOrg = "@TempData["oktaOrg"]";
+var mySessionId = "no session data";
+
+(function processData() {
+    displaySessions();
+
+})();
+
+
+
+
+
+//(function () {
+//    var url = window.location.href;
+//    var arr = url.split("/");
+//    var result = arr[0] + "//" + arr[2];
+//    //document.getElementById("demo").innerHTML = result;
+//    document.forms["getuserinfo"]["location"].value = result;
+//})();
+
+
+
+    function logoutSessions() {
+        baseUrl = myOktaOrg;
+
+        // Detect if user has session...
+        $.ajax({
+            url: baseUrl + '/api/v1/sessions/me',
+            crossDomain: true,
+            type: 'DELETE',
+            xhrFields: { withCredentials: true },
+            accept: 'application/json',
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            success: function (data) {
+                console.log(data);
+                displaySessions();
+            }
+        });
+
+    }
+
+    function displaySessions() {
+        // Variables
+
+        baseUrl = myOktaOrg;
+
+        document.getElementById("session").innerHTML = "Current Sessions Id: ";
+          //debugger;
+        // Detect if user has session...
+        $.ajax({
+            url: baseUrl + '/api/v1/sessions/me',
+            type: 'GET',
+            xhrFields: { withCredentials: true },
+            accept: 'application/json'
+        })
+        .done(function (meData) {
+            console.log('me: ', meData);
+            console.log('session_id', meData.id);
+            document.getElementById("my_session_id").innerHTML = meData.id;
+            document.getElementById("session_id").value = meData.id;
+            document.getElementById("oktaId").value = meData.userId;
+            mySessionId = meData.id;
+            console.log("SessionId:", meData.id);
+
+        })
+        .fail(function (meData, textStatus, error) {
+            console.log('meData: ', meData);
+            console.log('meData.status: ', meData.status);
+            console.log('statusText: ', meData.statusText);
+            console.log('error: ', error);
+
+            document.getElementById("my_session_id").innerHTML = "No Session ID present";
+
+        });
+    }
+
+</script>
+
+
+
+
